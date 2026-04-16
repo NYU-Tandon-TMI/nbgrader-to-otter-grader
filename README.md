@@ -1,4 +1,4 @@
-# nbgrader-to-otter v2.0
+# nbgrader-to-otter
 
 Converts nbgrader instructor notebooks to otter-grader format without dropping content. The core guarantee: every non-functional cell in the original appears in the converted output, or the pipeline tells you exactly which ones are missing and fixes them.
 
