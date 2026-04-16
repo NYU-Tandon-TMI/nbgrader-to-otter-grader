@@ -1,0 +1,12 @@
+{
+  "name": "nbgrader-to-otter",
+  "version": "1.0.0",
+  "description": "Lossless conversion of nbgrader-formatted Jupyter notebooks to otter-grader instructor format with deterministic evaluation loop, content preservation verification, and multi-layer testing",
+  "author": {
+    "name": "NYU Tandon TMI"
+  },
+  "repository": "https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader",
+  "homepage": "https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader",
+  "license": "MIT",
+  "keywords": ["nbgrader", "otter-grader", "jupyter", "notebook", "gradescope", "education", "autograder"]
+}

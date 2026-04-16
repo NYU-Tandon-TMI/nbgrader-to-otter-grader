@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Internal development artifacts
+docs/
+
+# Test outputs
+report.json
+assign.log
+structure.log
+autograder.log
+coherence.json
