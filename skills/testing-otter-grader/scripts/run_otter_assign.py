@@ -21,7 +21,6 @@ from pathlib import Path
 ERROR_PATTERNS = [
     ("SyntaxError", "otter_assign_syntax"),
     ("AssertionError", "test_failure"),
-    ("AssertionError", "test_failure"),
     ("KeyError", "otter_assign_yaml"),
     ("yaml.scanner.ScannerError", "otter_assign_yaml"),
     ("FileNotFoundError", "otter_assign_file_missing"),
