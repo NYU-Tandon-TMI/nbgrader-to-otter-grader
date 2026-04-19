@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "nbgrader-to-otter",
-      "source": ".",
+      "source": "./",
       "version": "1.0.0",
       "description": "Lossless conversion of nbgrader-formatted Jupyter notebooks to otter-grader instructor format with deterministic evaluation loop, content preservation verification, and multi-layer testing",
       "author": {
