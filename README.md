@@ -183,17 +183,43 @@ Test coverage includes:
 
 ## Installation
 
-```bash
-claude plugin marketplace add NYU-Tandon-TMI/nbgrader-to-otter-grader
-claude plugin install nbgrader-to-otter@nbgrader-to-otter-grader
+**Recommended — pin to a commit SHA** (immutable, audit-friendly, resistant to tag reassignment):
+
+```
+/plugin marketplace add NYU-Tandon-TMI/nbgrader-to-otter-grader#<commit-sha>
+/plugin install nbgrader-to-otter@nbgrader-to-otter-grader
 ```
 
-Or via slash command inside Claude Code:
+Get the SHA for the latest release from [GitHub Releases](https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader/releases). Each release pins an exact commit; verify it matches before installing.
+
+**Tag-based install** (convenient, but tags are mutable on GitHub):
+
+```
+/plugin marketplace add NYU-Tandon-TMI/nbgrader-to-otter-grader#v1.0.0
+/plugin install nbgrader-to-otter@nbgrader-to-otter-grader
+```
+
+**Unpinned** (tracks `main`, not recommended for production):
 
 ```
 /plugin marketplace add NYU-Tandon-TMI/nbgrader-to-otter-grader
 /plugin install nbgrader-to-otter@nbgrader-to-otter-grader
 ```
+
+### Updating a pinned install
+
+```
+/plugin marketplace remove nbgrader-to-otter-grader
+/plugin marketplace add NYU-Tandon-TMI/nbgrader-to-otter-grader#<new-sha>
+/plugin install nbgrader-to-otter@nbgrader-to-otter-grader
+```
+
+### Supply-chain notes
+
+- All plugin scripts execute locally in your Claude Code session. Review `skills/*/scripts/*.py` before installing.
+- The plugin performs no network calls, uses no `eval`/`exec`, and only invokes `subprocess.run` with list-form arguments (no shell interpolation) to call `otter`, `jupyter`, and `python3` from your local environment.
+- No credentials, API keys, or secrets are stored in the repo; the plugin does not read or write any environment variables beyond what the local `otter` and `jupyter` commands require.
+- Report vulnerabilities via [Security Advisories](https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader/security/advisories/new) (see `SECURITY.md`).
 
 ---
 
