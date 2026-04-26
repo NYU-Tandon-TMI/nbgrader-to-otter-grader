@@ -61,6 +61,64 @@ The pipeline handles structural conversion, but two things need human review eve
 
 ---
 
+## Testing pipeline
+
+Structural conversion is half the job. Once `otter assign` builds the `dist/` artifacts, a separate pipeline checks that the autograder actually runs, that no solutions leaked into the student notebook, and that the student-facing prose still makes sense after solution stripping.
+
+```bash
+SCRIPTS=skills/testing-otter-grader/scripts
+
+# 1. Pre-flight: solution cells must have outputs
+python3 $SCRIPTS/check_outputs.py homework-N.ipynb
+
+# 2. Build (also runs in step 8 above; idempotent)
+python3 $SCRIPTS/run_otter_assign.py homework-N.ipynb dist/ > assign.log
+
+# 3. Verify dist/ structure (autograder zip, student notebook, companion files)
+python3 $SCRIPTS/validate_generated_output.py dist/ --config homework-N.ipynb > structure.log
+
+# 4. Coherence check (LLM-as-judge) — see below
+python3 $SCRIPTS/eval_student_coherence.py dist/student/homework-N.ipynb
+# read the printed prompt, evaluate, write findings to coherence.json
+
+# 5. Run autograder against instructor solutions — expect 100%
+python3 $SCRIPTS/run_autograder_tests.py \
+    dist/autograder/homework-N.ipynb \
+    dist/autograder/homework-N-autograder_*.zip > autograder.log
+
+# 6. Aggregate everything into a single report
+python3 $SCRIPTS/generate_report.py \
+    --notebook homework-N.ipynb \
+    --assign-log assign.log \
+    --structure-log structure.log \
+    --student-notebook dist/student/homework-N.ipynb \
+    --instructor-notebook homework-N.ipynb \
+    --autograder-log autograder.log \
+    --coherence coherence.json \
+    --output report.json
+```
+
+If `report.json` shows `pipeline_status: "pass"`, the assignment is ready to upload to Gradescope. On failure, `summary.fix_actions` lists the prioritized changes by cell index.
+
+### Coherence check (LLM-as-judge)
+
+`otter assign` strips solution cells and replaces them with `# YOUR CODE HERE` placeholders. Anything those cells introduced — variable names, intermediate results, narrative setup — disappears with them. Later cells that reference the missing context become incoherent for the student even though the autograder still passes.
+
+`eval_student_coherence.py` extracts the post-strip student notebook, prints an evaluation prompt, and stops. The reading agent (Claude in your session, or any other LLM) plays the role of a student encountering the notebook for the first time and reports gaps as JSON:
+
+```json
+[
+  {"cell_index": 12, "description": "References 'model' which was never introduced", "severity": "high"},
+  {"cell_index": 24, "description": "Mentions 'the previous step' but no such step exists", "severity": "medium"}
+]
+```
+
+Save the output to `coherence.json` and pass it to `generate_report.py`. Findings are advisory — they appear under `stages.coherence` but never flip `pipeline_status`. High-severity gaps should be resolved by adding scaffolding cells (variable declarations, brief context paragraphs) before the question block, then re-running the conversion.
+
+The LLM-as-judge approach catches what static validators miss: silent narrative breaks where the autograder is happy but the student is lost.
+
+---
+
 ## Scripts
 
 All scripts live in `skills/refactoring-nbgrader-to-otter/scripts/`. They share `_lib.py`.
@@ -243,9 +301,13 @@ nbgrader-to-otter-grader/
         troubleshooting.md
     testing-otter-grader/
       scripts/
-        eval_student_coherence.py  # LLM-as-student coherence check
-        run_otter_assign.py
-        check_outputs.py
+        check_outputs.py             # Pre-flight: solution cells have outputs
+        run_otter_assign.py          # Build wrapper (300s timeout)
+        validate_generated_output.py # Verify dist/ structure
+        eval_student_coherence.py    # LLM-as-judge coherence check
+        run_autograder_tests.py      # Grade solutions against autograder zip
+        run_notebook.py              # Standalone notebook executor
+        generate_report.py           # Aggregate all stages into report.json
   agents/
     notebook-converter.md          # Orchestrator agent
     refactoring-agent.md
