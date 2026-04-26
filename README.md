@@ -71,7 +71,7 @@ SCRIPTS=skills/testing-otter-grader/scripts
 # 1. Pre-flight: solution cells must have outputs
 python3 $SCRIPTS/check_outputs.py homework-N.ipynb
 
-# 2. Build (also runs in step 8 above; idempotent)
+# 2. Build (runs `otter assign` with a 300s timeout, captures logs)
 python3 $SCRIPTS/run_otter_assign.py homework-N.ipynb dist/ > assign.log
 
 # 3. Verify dist/ structure (autograder zip, student notebook, companion files)
@@ -116,6 +116,12 @@ If `report.json` shows `pipeline_status: "pass"`, the assignment is ready to upl
 Save the output to `coherence.json` and pass it to `generate_report.py`. Findings are advisory — they appear under `stages.coherence` but never flip `pipeline_status`. High-severity gaps should be resolved by adding scaffolding cells (variable declarations, brief context paragraphs) before the question block, then re-running the conversion.
 
 The LLM-as-judge approach catches what static validators miss: silent narrative breaks where the autograder is happy but the student is lost.
+
+### Failure mode worth watching: trapped markdown
+
+When an nbgrader question has the shape `solution cell → markdown cell → solution cell`, `wrap_transform` groups all three into one `BEGIN SOLUTION` / `END SOLUTION` block, and `otter assign` strips everything inside that block — including the markdown — from the student notebook. The autograder still passes, but the student loses context.
+
+Catch it two ways: `diff_notebooks` reports the markdown cell as dropped after transform (compare counts before running `otter assign`), and the coherence check flags the resulting narrative gap in the student notebook. Fix by moving the trapped markdown cell to just before `BEGIN SOLUTION` so it sits outside the solution block.
 
 ---
 
@@ -222,20 +228,6 @@ Test coverage includes:
 - `test_fix_cells.py` — reinsertion and relocation, metadata stripping, original metadata preservation
 - `test_validate_structure.py` — each validation category, `--skip-cleanup` flag
 - `test_pipeline.py` — end-to-end: transform → diff → fix loop on all fixture notebooks
-
----
-
-## Known limitations
-
-**Sub-question naming.** Headers like `### Question 3.2` produce `q3` — the regex captures only the leading integer. Collision is detected by `validate_structure`; fix by manually editing the `name:` field in the delimiter cell.
-
-**Embedded question headers.** When a markdown cell contains both prose and a question header (e.g., a transition paragraph ending with `#### Question 2.2`), `diff_notebooks` flags it as a question header outside a question block. This is a correct structural observation — the header should be in its own cell. Low priority unless otter assign fails on it.
-
-**ASSIGNMENT CONFIG not generated.** The transform has no way to infer assignment-level metadata (name, seed, etc.). Always add this manually.
-
-**First-cell type.** If the original notebook starts with a markdown title cell, `validate_structure` will flag it. Convert to raw and add `# ASSIGNMENT CONFIG` content above it, or insert a new raw cell before it.
-
-**Multi-solution question groups.** If a question has more than one solution cell (e.g., a sub-part), the transform wraps them together. Verify the `BEGIN SOLUTION` / `END SOLUTION` pair covers the intended cell range.
 
 ---
 
