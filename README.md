@@ -51,13 +51,7 @@ python3 $SCRIPTS/validate_structure.py homework-N.ipynb
 otter assign homework-N.ipynb dist --no-run-tests
 ```
 
-### After transform — manual fixes always required
-
-The pipeline handles structural conversion, but two things need human review every time:
-
-**Duplicate question names.** The transform derives question names from section headers (`### Question 2` → `q2`). Sub-questions (`### Question 2.2` → also `q2`) collide. `validate_structure` reports these; rename them in the raw delimiter cells (`name: q2_2`).
-
-**ASSIGNMENT CONFIG.** The first cell must be a raw cell with `# ASSIGNMENT CONFIG` and assignment-level YAML. The transform does not create this. Add it manually before running `otter assign`.
+The first cell of the source notebook must be a raw cell with `# ASSIGNMENT CONFIG` and assignment-level YAML before step 8 — the transform doesn't synthesize it. Anything else `otter assign` needs (duplicate `qN` names from sub-questions, missing markers, leftover nbgrader metadata) is flagged by `validate_structure` in steps 3 and 7; fix what it reports and re-run.
 
 ---
 
