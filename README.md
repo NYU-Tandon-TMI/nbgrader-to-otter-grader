@@ -1,6 +1,7 @@
 # nbgrader-to-otter
 
 Converts nbgrader instructor notebooks to otter-grader format without dropping content.
+
 ---
 
 ## How it works
