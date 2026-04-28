@@ -1,7 +1,6 @@
 # nbgrader-to-otter
 
-Converts nbgrader instructor notebooks to otter-grader format without dropping content. The core guarantee: every non-functional cell in the original appears in the converted output, or the pipeline tells you exactly which ones are missing and fixes them.
-
+Converts nbgrader instructor notebooks to otter-grader format without dropping content.
 ---
 
 ## How it works
@@ -234,7 +233,7 @@ Test coverage includes:
 /plugin install nbgrader-to-otter@nbgrader-to-otter-grader
 ```
 
-Get the SHA for the latest release from [GitHub Releases](https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader/releases). Each release pins an exact commit; verify it matches before installing.
+Get the SHA for the latest release from [GitHub Releases](https://github.com/NYU-Tandon-TMI/nbgrader-to-otter-grader/releases).
 
 **Tag-based install** (convenient, but tags are mutable on GitHub):
 
