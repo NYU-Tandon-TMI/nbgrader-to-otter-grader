@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/social-preview.png" alt="nbgrader → otter-grader" width="100%" />
+</p>
+
 # nbgrader-to-otter
 
 Converts nbgrader instructor notebooks to otter-grader format without dropping content.
